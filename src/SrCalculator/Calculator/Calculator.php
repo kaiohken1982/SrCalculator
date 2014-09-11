@@ -170,11 +170,6 @@ class Calculator
                 
                     $stack->pop();
                     $op2 = ($stack->count() > 0) ? $stack->top() : '';
-                    
-//                     if($i == 3) {
-//                         print_r($op2);
-//                         exit;
-//                     }
                 }
                 
                 $stack->push($token);

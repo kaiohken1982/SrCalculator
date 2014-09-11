@@ -80,4 +80,26 @@ class CalculatorTest
         $result = $this->obj->calculate();
         $this->assertEquals($result, -16);
     }
+    
+    /**
+     * @covers \SrCalculator\Calculator\Calculator::getToken() 
+     * @covers \SrCalculator\Calculator\Calculator::calculate() 
+     */
+    public function testMultiplyFloatNumbers() 
+    {
+        $this->obj->setEquation('12.5*2.5');
+        $result = $this->obj->calculate();
+        $this->assertEquals($result, 31.25);
+    }
+    
+    /**
+     * @covers \SrCalculator\Calculator\Calculator::getToken() 
+     * @covers \SrCalculator\Calculator\Calculator::calculate() 
+     */
+    public function testDivisionFloatNumbers() 
+    {
+        $this->obj->setEquation('6/1.1');
+        $result = $this->obj->calculate();
+        $this->assertEquals($result, 5.454545454545455);
+    }
 }
