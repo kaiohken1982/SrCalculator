@@ -4,9 +4,6 @@ php:
   - 5.3
   - 5.4
   - 5.5
-  
-services: 
-  - mysql
  
 branches:
   only:
@@ -14,6 +11,10 @@ branches:
     
 notifications:
   email: false
+
+before_script:
+  - curl -s http://getcomposer.org/installer | php
+  - php composer.phar install --prefer-dist --dev
   
 script:
   - mkdir -p build/logs
