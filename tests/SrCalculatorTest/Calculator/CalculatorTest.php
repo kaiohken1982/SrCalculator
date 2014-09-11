@@ -61,11 +61,23 @@ class CalculatorTest
     
     /**
      * @covers \SrCalculator\Calculator\Calculator::getToken() 
+     * @covers \SrCalculator\Calculator\Calculator::calculate() 
      * @expectedException Exception
      */
     public function testSomethingWrongWithToken() 
     {
         $this->obj->setEquation('2 + hello');
         $result = $this->obj->calculate();
+    }
+    
+    /**
+     * @covers \SrCalculator\Calculator\Calculator::getToken() 
+     * @covers \SrCalculator\Calculator\Calculator::calculate() 
+     */
+    public function testCalculateMinorZero() 
+    {
+        $this->obj->setEquation('2+2*3-2*12');
+        $result = $this->obj->calculate();
+        $this->assertEquals($result, -16);
     }
 }

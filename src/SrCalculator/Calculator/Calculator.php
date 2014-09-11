@@ -70,10 +70,20 @@ class Calculator
      * @param unknown $i
      * @return string
      */
-    public function getToken($equation, $i) 
+    public function getToken($equation, &$i) 
     {
         $length = strlen($equation);
 		$token = $equation[$i];	
+		$nextToken = isset($equation[$i+1]) ? $equation[$i+1] : '';
+		
+        if (is_numeric($token) || $token == '.') {
+		    // Numbers can be longer than 1 char
+		    while ($i < $length && (is_numeric($nextToken) || $nextToken == '.')) {
+		        $token .= $nextToken;
+		        $i++;
+		        $nextToken = ($i + 1) < $length ? $equation[$i+1] : '';
+		    }
+		}
 		
 		if(!is_numeric($token) && !in_array($token, $this->validTokens)) {
 		    throw new \Exception('Invalid token in your equation. Valid tokens are ' . (implode(", ", $this->validTokens)));
@@ -88,6 +98,8 @@ class Calculator
     public function calculate() 
     {
         $this->parseEquation();
+        
+        
         
         // This variable will contain the intermediate calculation of the equation
         $stack = new \SplStack();	
@@ -140,14 +152,12 @@ class Calculator
         
         for ($i = 0; $i < $length; $i++) {
             $token = $this->getToken($this->equation, $i);
-            
             if(is_numeric($token)) {
                 $queue->enqueue($token);
             } else {
                 // We will manage here operator precedence
                 // Last operator in the stack
                 $op2 = $stack->count() > 0 ? $stack->top() : '';
-                
                 while (in_array($op2, $this->validTokens)) {
                     if (
                         self::$operators[$token]['assoc'] == 'left' &&
@@ -159,7 +169,12 @@ class Calculator
                     }
                 
                     $stack->pop();
-                    $op2 = ($stack->count() > 0) ? $stack->top() : null;
+                    $op2 = ($stack->count() > 0) ? $stack->top() : '';
+                    
+//                     if($i == 3) {
+//                         print_r($op2);
+//                         exit;
+//                     }
                 }
                 
                 $stack->push($token);
