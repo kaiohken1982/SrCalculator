@@ -21,7 +21,7 @@ composer.json
       }
     ],
     "require": {
-      "kaiohken1982/cardtest": "dev-master"
+      "kaiohken1982/srcalculator": "dev-master"
     }
 }
 ```
