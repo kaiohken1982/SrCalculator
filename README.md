@@ -2,6 +2,7 @@ SrCalculator
 ============
 
 [![Build Status](https://travis-ci.org/kaiohken1982/SrCalculator.svg)](https://travis-ci.org/kaiohken1982/SrCalculator)
+[![Coverage Status](https://img.shields.io/coveralls/kaiohken1982/SrCalculator.svg)](https://coveralls.io/r/kaiohken1982/SrCalculator)
 
 A calculator test
 
