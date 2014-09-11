@@ -1,6 +1,8 @@
 SrCalculator
 ============
 
+[![Build Status](https://travis-ci.org/kaiohken1982/SrCalculator.svg)](https://travis-ci.org/kaiohken1982/SrCalculator)
+
 A calculator test
 
 ### Description
