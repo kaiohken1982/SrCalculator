@@ -114,7 +114,7 @@ class Calculator
          * 
          * 2
          * 4
-         * 5
+         * 3
          * mul
          * add
          * 5
