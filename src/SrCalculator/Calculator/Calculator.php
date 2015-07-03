@@ -3,6 +3,10 @@ namespace SrCalculator\Calculator;
 
 use \SrCalculator\Math\Math;
 
+/**
+ *
+ * @author Sergio Rinaudo
+ */
 class Calculator 
     implements CalculatorInterface
 {  
