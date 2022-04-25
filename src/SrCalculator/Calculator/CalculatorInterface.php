@@ -8,5 +8,5 @@ interface CalculatorInterface
      * 
      * @return number
      */
-    function calculate();
+    function calculate(string $equation);
 }

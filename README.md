@@ -41,8 +41,8 @@ $equation = isset($argv[1]) ? $argv[1] : ''; // the first parameter
 //$argv[2]; // the second parameter
 
 try {
-  $calculator = new Calculator($equation);
-  echo 'Result is ' . $calculator->calculate() . PHP_EOL;
+  $calculator = new Calculator();
+  echo 'Result is ' . $calculator->calculate($equation) . PHP_EOL;
 } catch (Exception $e) {
   echo 'Script ended with this message: ' . $e->getMessage() . PHP_EOL;
 }

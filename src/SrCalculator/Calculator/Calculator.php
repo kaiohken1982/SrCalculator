@@ -16,12 +16,6 @@ class Calculator
     protected $equation;
     
     /**
-     * The parsed equation as \SplQueue object
-     * @var \SplQueue
-     */
-    protected $parsedEquation;
-    
-    /**
      * All valid tokens. If the equation contains something that is not numeric and not in this array 
      * an exception will be raised
      * @var array
@@ -36,17 +30,7 @@ class Calculator
         '/' => array('assoc' => 'left', 'pre' => 2, 'function' => 'divide'),
     );
     
-    public function __construct($equation = '') 
-    {
-        $this->setEquation($equation);
-    }
-    
-    /**
-     * 
-     * @param string $equation
-     * @return \SrCalculator\Calculator\Calculator
-     */
-    public function setEquation($equation = '') 
+    public function validateAndFilterEquation($equation = '') 
     {
         $equation = str_replace(' ', '', $equation);
         
@@ -54,27 +38,10 @@ class Calculator
             throw new \Exception('Equation is empty');
         }
     
-        $this->equation = $equation;
-        
-        return $this;
+        return $equation;
     }
     
-    /**
-     * 
-     * @return string
-     */
-    public function getEquation() 
-    {
-        return $this->equation;
-    }
-    
-    /**
-     * 
-     * @param unknown $equation
-     * @param unknown $i
-     * @return string
-     */
-    public function getToken($equation, &$i) 
+    public function getToken(string $equation, &$i) 
     {
         $length = strlen($equation);
 		$token = $equation[$i];	
@@ -96,20 +63,11 @@ class Calculator
 		return $token;
     }
     
-    /**
-     * 
-     */
-    public function calculate() 
+    public function calculate(string $equation) 
     {
-        $this->parseEquation();
-        
-        
-        
-        // This variable will contain the intermediate calculation of the equation
-        $stack = new \SplStack();	
-       
-        // Working with a clone of the queue so we'll keep the original
-        $equationClone = clone $this->parsedEquation;
+        $equation = $this->validateAndFilterEquation($equation);
+        $parsedEquation = $this->parseEquation($equation);
+        $intermediateCalculationContainer = [];	
         
         /**
          * At this point the queue, for this example equation
@@ -126,65 +84,93 @@ class Calculator
          * 1
          * add
          */
-        while ($equationClone->count() > 0) {
+        while (count($parsedEquation) > 0) {
             // The first element we added to the queue
-            $token = $equationClone->shift();
+            $token = array_shift($parsedEquation);
             	
             if (is_numeric($token)) {
-                $stack->push($token);
+                $intermediateCalculationContainer[] = $token;
             } else {
-                if ($stack->count() >= 2) {
-                    $op1 = $stack->pop();
-                    $op2 = $stack->pop();
+                if (count($intermediateCalculationContainer) >= 2) {
+                    $firstNumber = array_pop($intermediateCalculationContainer);
+                    $secondNumber = array_pop($intermediateCalculationContainer);
                 } else {
                     throw new \Exception('Not enough operands on the stack');
                 }
                 
-                $stack->push(call_user_func(array('SrCalculator\Math\Math', $token), $op2, $op1));
+                $intermediateCalculationContainer[] = call_user_func([
+                    'SrCalculator\Math\Math', $token
+                ], $firstNumber, $secondNumber);
             }
         }
         
         // At this point, inside the stack, we have only the final result
-        return $stack->pop();
+        return array_pop($intermediateCalculationContainer);
     }
     
-    private function parseEquation() 
+    /**
+     * We transform from this
+     * 2 + 4 * 3 + 5 + 1 
+     * 
+     * to this
+     * 
+     * 2
+     * 4
+     * 3
+     * mul
+     * add
+     * 5
+     * add
+     * 1
+     * add
+     */
+    private function parseEquation(string $equation) 
     {
-        $length = strlen($this->equation);
-        $queue = new \SplQueue();
-        $stack = new \SplStack();
+        $length = strlen($equation);
+        $equationParts = [];
+        $operandTemporaryContainer = [];
         
         for ($i = 0; $i < $length; $i++) {
-            $token = $this->getToken($this->equation, $i);
+            $token = $this->getToken($equation, $i);
             if(is_numeric($token)) {
-                $queue->enqueue($token);
+                $equationParts[] = $token;
             } else {
-                // We will manage here operator precedence
-                // Last operator in the stack
-                $op2 = $stack->count() > 0 ? $stack->top() : '';
-                while (in_array($op2, $this->validTokens)) {
+                if(!in_array($token, $this->validTokens)) {
+                    throw new \Exception('Not a valid token');
+                }
+
+                while($lastAddedOperand = $this->readLastAddedOperand($operandTemporaryContainer)) {
                     if (
                         self::$operators[$token]['assoc'] == 'left' &&
-                        self::$operators[$token]['pre'] <= self::$operators[$op2]['pre']
+                        self::$operators[$token]['pre'] <= self::$operators[$lastAddedOperand]['pre']
                     ) {
-                        $queue->enqueue(self::$operators[$op2]['function']);
+                        $function = self::$operators[$lastAddedOperand]['function'];
+                        $equationParts[] = $function;
+
+                        /**
+                         * Se lo abbiamo aggiunto, dobbiamo rimuoverlo
+                         */
+                        array_pop($operandTemporaryContainer);
                     } else {
                         break;
                     }
-                
-                    $stack->pop();
-                    $op2 = ($stack->count() > 0) ? $stack->top() : '';
                 }
-                
-                $stack->push($token);
+                $operandTemporaryContainer[] = $token;
             }
         }
-        
-        // while items on the stack, push to the queue
-        while ($stack->count() > 0) {
-            $queue->enqueue(self::$operators[$stack->pop()]['function']);
+            
+        while (count($operandTemporaryContainer) > 0) {
+            $operand = array_pop($operandTemporaryContainer);
+            $function = self::$operators[$operand]['function'];
+            $equationParts[] = $function;
         }
         
-        $this->parsedEquation = $queue;
+        return $equationParts;
+    }
+
+    private function readLastAddedOperand(&$operandTemporaryContainer) 
+    {
+        return count($operandTemporaryContainer) > 0 ? 
+            $operandTemporaryContainer[count($operandTemporaryContainer)-1] : null;
     }
 }
